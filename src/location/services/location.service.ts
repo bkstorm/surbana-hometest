@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ILike, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Location } from '../entities';
-import { GetLocationsDto } from '../dtos';
+import { CreateLocationDto, GetLocationsDto } from '../dtos';
 
 @Injectable()
 export class LocationService {
@@ -31,5 +31,34 @@ export class LocationService {
       .orderBy(getLocationDto.sortBy, getLocationDto.sortType);
 
     return qb.getMany();
+  }
+
+  async createLocation(
+    createLocationDto: CreateLocationDto,
+  ): Promise<Location> {
+    try {
+      if (createLocationDto.parentId) {
+        const parent = await this.getLocationById(createLocationDto.parentId);
+        if (!parent) {
+          throw new BadRequestException(
+            'Location with provided parentId does not exist',
+          );
+        }
+      }
+
+      return await this.locationRepository.save(createLocationDto);
+    } catch (error) {
+      // duplicate code in location
+      if (error.constraint === 'location_code_key') {
+        throw new BadRequestException(
+          'Location with provided code already exists',
+        );
+      }
+      throw error;
+    }
+  }
+
+  async getLocationById(id: number): Promise<Location> {
+    return this.locationRepository.findOneBy({ id });
   }
 }

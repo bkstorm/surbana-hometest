@@ -1,7 +1,14 @@
-import { Controller, Get, Query, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  ValidationPipe,
+} from '@nestjs/common';
 import { Location } from '../entities';
 import { LocationService } from '../services';
-import { GetLocationsDto } from '../dtos';
+import { CreateLocationDto, GetLocationsDto } from '../dtos';
 
 @Controller('/locations')
 export class LocationController {
@@ -11,7 +18,13 @@ export class LocationController {
   async getLocations(
     @Query(new ValidationPipe()) getLocationsDto: GetLocationsDto,
   ): Promise<Location[]> {
-    console.log('dto', getLocationsDto);
     return this.locationService.getLocations(getLocationsDto);
+  }
+
+  @Post()
+  async createLocation(
+    @Body() createLocationDto: CreateLocationDto,
+  ): Promise<Location> {
+    return this.locationService.createLocation(createLocationDto);
   }
 }
