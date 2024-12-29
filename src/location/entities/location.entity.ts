@@ -29,4 +29,7 @@ export class Location {
   @ManyToOne(() => Location, (location) => location.children)
   @JoinColumn({ name: 'parent_id' })
   parent?: Location;
+
+  @Column({ name: 'parent_id', type: 'integer' })
+  parentId?: number;
 }
