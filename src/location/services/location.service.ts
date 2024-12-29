@@ -61,4 +61,8 @@ export class LocationService {
   async getLocationById(id: number): Promise<Location> {
     return this.locationRepository.findOneBy({ id });
   }
+
+  async deleteLocationById(id: number): Promise<void> {
+    await this.locationRepository.delete(id);
+  }
 }
