@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   ValidationPipe,
 } from '@nestjs/common';
@@ -30,6 +31,14 @@ export class LocationController {
     @Body() createLocationDto: CreateLocationDto,
   ): Promise<Location> {
     return this.locationService.createLocation(createLocationDto);
+  }
+
+  @Put(':id')
+  async updateLocation(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() createLocationDto: CreateLocationDto,
+  ): Promise<Location> {
+    return this.locationService.updateLocation(id, createLocationDto);
   }
 
   @Delete(':id')
