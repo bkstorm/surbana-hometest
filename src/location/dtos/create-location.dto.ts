@@ -1,4 +1,5 @@
 import {
+  IsInt,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -20,6 +21,7 @@ export class CreateLocationDto {
   area: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
+  @IsPositive()
   parentId?: number;
 }

@@ -9,6 +9,7 @@ import {
   Location,
   SortType,
   LocationService,
+  CreateLocationDto,
 } from '../src/location';
 
 const logger = new Logger();
@@ -80,27 +81,69 @@ describe('LocationController (e2e)', () => {
       });
     });
 
-    it('should throw 400 Bad Request if page is less than 1', () => {
+    it('should return 400 Bad Request if page is less than 1', () => {
       return request(app.getHttpServer())
         .get(`/locations?page=${faker.number.int({ max: 0 })}`)
         .expect(400);
     });
 
-    it('should throw 400 Bad Request if page is not an integer', () => {
+    it('should return 400 Bad Request if page is not an integer', () => {
       return request(app.getHttpServer())
         .get(`/locations?page=${faker.number.float()}`)
         .expect(400);
     });
 
-    it('should throw 400 Bad Request if size is less than min', () => {
+    it('should return 400 Bad Request if size is less than min', () => {
       return request(app.getHttpServer())
         .get(`/locations?size=${faker.number.int({ max: 0 })}`)
         .expect(400);
     });
 
-    it('should throw 400 Bad Request if size is greater than max', () => {
+    it('should return 400 Bad Request if size is greater than max', () => {
       return request(app.getHttpServer())
         .get(`/locations?size=${faker.number.int({ min: 51 })}`)
+        .expect(400);
+    });
+  });
+
+  describe('/locations (POST)', () => {
+    it('should return a location if data is valid', async () => {
+      const location: CreateLocationDto = {
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000 }),
+      };
+      const { body } = await request(app.getHttpServer())
+        .post('/locations')
+        .send(location)
+        .expect(201);
+      expect(body).toMatchObject(location);
+    });
+
+    it('should return 400 Bad Request if code already exists', async () => {
+      const location: CreateLocationDto = {
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000 }),
+      };
+      await request(app.getHttpServer()).post('/locations').send(location);
+      return request(app.getHttpServer())
+        .post('/locations')
+        .send(location)
+        .expect(400);
+    });
+
+    it('should return 400 Bad Request if parentId does not exists', async () => {
+      await DataSource.getRepository(Location).clear();
+      const location: CreateLocationDto = {
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000 }),
+        parentId: faker.number.int({ min: 1, max: 1000 }),
+      };
+      return request(app.getHttpServer())
+        .post('/locations')
+        .send(location)
         .expect(400);
     });
   });
