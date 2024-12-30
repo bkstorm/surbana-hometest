@@ -27,12 +27,12 @@ export class GetLocationsDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(20)
+  @MaxLength(255)
   name?: string;
 
   @IsOptional()
   @IsString()
-  @MaxLength(20)
+  @MaxLength(255)
   code?: string;
 
   @IsOptional()

@@ -17,11 +17,13 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migrate:up": "npx typeorm-ts-node-commonjs migration:run -d ./src/db/ormconfig.migration.ts",
-    "migrate:down": "npx typeorm-ts-node-commonjs migration:revert -d ./src/db/ormconfig.migration.ts",
-    "seed:up": "npx typeorm-ts-node-commonjs migration:run -d ./src/db/ormconfig.seed.ts",
-    "seed:down": "npx typeorm-ts-node-commonjs migration:revert -d ./src/db/ormconfig.seed.ts"
+    "test:e2e": "dotenv -e .env.test -- jest --config ./test/jest-e2e.json --detectOpenHandles --testTimeout=10000",
+    "migrate:up": "dotenv -e .env -- npx typeorm-ts-node-commonjs migration:run -d ./src/database/ormconfig.migration.ts",
+    "migrate:down": "dotenv -e .env -- npx typeorm-ts-node-commonjs migration:revert -d ./src/database/ormconfig.migration.ts",
+    "migrate:e2e-up": "dotenv -e .env.test -- npx typeorm-ts-node-commonjs migration:run -d ./src/database/ormconfig.migration.ts",
+    "migrate:e2e-down": "dotenv -e .env.test -- npx typeorm-ts-node-commonjs migration:revert -d ./src/database/ormconfig.migration.ts",
+    "seed:up": "dotenv -e .env -- npx typeorm-ts-node-commonjs migration:run -d ./src/database/ormconfig.seed.ts",
+    "seed:down": "dotenv -e .env -- npx typeorm-ts-node-commonjs migration:revert -d ./src/database/ormconfig.seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -37,6 +39,7 @@
     "typeorm": "^0.3.20"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.3.0",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
@@ -46,6 +49,8 @@
     "@types/supertest": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
+    "dotenv": "^16.4.7",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^8.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
