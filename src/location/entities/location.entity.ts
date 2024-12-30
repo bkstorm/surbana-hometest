@@ -18,7 +18,14 @@ export class Location {
   @Column({ nullable: false, type: 'text', unique: true })
   code: string;
 
-  @Column({ nullable: false, type: 'float' })
+  @Column({
+    nullable: false,
+    type: 'float',
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
+  })
   area: number;
 
   @OneToMany(() => Location, (location) => location.parent, {

@@ -107,11 +107,11 @@ describe('LocationController (e2e)', () => {
   });
 
   describe('/locations (POST)', () => {
-    it('should return a location if data is valid', async () => {
+    it('should create a new location if data is valid', async () => {
       const location: CreateLocationDto = {
         name: faker.string.alpha({ length: { min: 1, max: 255 } }),
         code: faker.location.buildingNumber(),
-        area: faker.number.float({ min: 1, max: 1000 }),
+        area: faker.number.float({ min: 1, max: 1000, fractionDigits: 2 }),
       };
       const { body } = await request(app.getHttpServer())
         .post('/locations')
@@ -145,6 +145,80 @@ describe('LocationController (e2e)', () => {
         .post('/locations')
         .send(location)
         .expect(400);
+    });
+  });
+
+  describe('/locations (PUT)', () => {
+    it('should update the location if data is valid', async () => {
+      const location = await DataSource.getRepository(Location).save({
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000 }),
+      });
+      const data: CreateLocationDto = {
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000, fractionDigits: 2 }),
+      };
+      const { body } = await request(app.getHttpServer())
+        .put(`/locations/${location.id}`)
+        .send(data)
+        .expect(200);
+      expect(body).toMatchObject(data);
+    });
+
+    it('should return 400 Bad Request if code already exists', async () => {
+      const location1 = await DataSource.getRepository(Location).save({
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000 }),
+      });
+      const location2 = await DataSource.getRepository(Location).save({
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000 }),
+      });
+      const data: CreateLocationDto = {
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: location1.code,
+        area: faker.number.float({ min: 1, max: 1000 }),
+      };
+      return request(app.getHttpServer())
+        .put(`/locations/${location2.id}`)
+        .send(data)
+        .expect(400);
+    });
+
+    it('should return 400 Bad Request if parentId does not exists', async () => {
+      await DataSource.getRepository(Location).clear();
+      const location = await DataSource.getRepository(Location).save({
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000 }),
+      });
+      const data: CreateLocationDto = {
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000 }),
+        parentId: faker.number.int({ min: location.id + 1, max: 10e6 }),
+      };
+      return request(app.getHttpServer())
+        .put(`/locations/${location.id}`)
+        .send(data)
+        .expect(400);
+    });
+
+    it('should return 404 Not Found if location does not exists', async () => {
+      await DataSource.getRepository(Location).clear();
+      const data: CreateLocationDto = {
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000 }),
+      };
+      return request(app.getHttpServer())
+        .put(`/locations/${faker.number.int({ min: 1, max: 10e6 })}`)
+        .send(data)
+        .expect(404);
     });
   });
 });
