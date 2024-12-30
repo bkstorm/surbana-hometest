@@ -71,7 +71,7 @@ export class LocationService {
       if (affected === 0) {
         throw new NotFoundException(`Location with id ${id} not found`);
       }
-      return this.getLocationById(id);
+      return this.locationRepository.findOneBy({ id });
     } catch (error) {
       if (error.constraint === 'location_parent_id_fkey') {
         throw new BadRequestException(
@@ -90,7 +90,12 @@ export class LocationService {
   }
 
   async getLocationById(id: number): Promise<Location> {
-    return this.locationRepository.findOneBy({ id });
+    const location = await this.locationRepository.findOneBy({ id });
+    if (!location) {
+      throw new NotFoundException('Location with id does not exists');
+    }
+
+    return location;
   }
 
   async deleteLocationById(id: number): Promise<void> {

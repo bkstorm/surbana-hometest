@@ -19,6 +19,13 @@ import { CreateLocationDto, GetLocationsDto } from '../dtos';
 export class LocationController {
   constructor(private locationService: LocationService) {}
 
+  @Get(':id')
+  async getLocationById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Location> {
+    return this.locationService.getLocationById(id);
+  }
+
   @Get()
   async getLocations(
     @Query(new ValidationPipe()) getLocationsDto: GetLocationsDto,
