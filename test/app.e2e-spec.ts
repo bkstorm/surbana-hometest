@@ -148,7 +148,7 @@ describe('LocationController (e2e)', () => {
     });
   });
 
-  describe('/locations (PUT)', () => {
+  describe('/locations/:id (PUT)', () => {
     it('should update the location if data is valid', async () => {
       const location = await DataSource.getRepository(Location).save({
         name: faker.string.alpha({ length: { min: 1, max: 255 } }),
@@ -218,6 +218,27 @@ describe('LocationController (e2e)', () => {
       return request(app.getHttpServer())
         .put(`/locations/${faker.number.int({ min: 1, max: 10e6 })}`)
         .send(data)
+        .expect(404);
+    });
+  });
+
+  describe('/locations/:id (GET)', () => {
+    it('should return a location if the location exists', async () => {
+      const location = await DataSource.getRepository(Location).save({
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000, fractionDigits: 2 }),
+      });
+      const { body } = await request(app.getHttpServer())
+        .get(`/locations/${location.id}`)
+        .expect(200);
+      expect(body).toMatchObject(location);
+    });
+
+    it('should return 404 Not Found if the location does not exist', async () => {
+      await DataSource.getRepository(Location).clear();
+      return request(app.getHttpServer())
+        .get(`/locations/${faker.number.int({ min: 1, max: 10e6 })}`)
         .expect(404);
     });
   });
