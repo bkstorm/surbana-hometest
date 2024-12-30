@@ -30,6 +30,12 @@ export class LocationService {
       });
     }
 
+    if (getLocationDto.parentId) {
+      qb.where({
+        parentId: getLocationDto.parentId,
+      });
+    }
+
     qb.offset((getLocationDto.page - 1) * getLocationDto.size)
       .limit(getLocationDto.size)
       .orderBy(getLocationDto.sortBy, getLocationDto.sortType);

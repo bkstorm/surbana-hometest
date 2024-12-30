@@ -3,6 +3,7 @@ import {
   IsEnum,
   IsInt,
   IsOptional,
+  IsPositive,
   IsString,
   Max,
   MaxLength,
@@ -34,6 +35,12 @@ export class GetLocationsDto {
   @IsString()
   @MaxLength(255)
   code?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  @IsInt()
+  @IsPositive()
+  parentId?: number;
 
   @IsOptional()
   @IsEnum(GetLocationsSortBy)
