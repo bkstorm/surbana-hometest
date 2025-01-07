@@ -208,6 +208,37 @@ describe('LocationController (e2e)', () => {
         .expect(400);
     });
 
+    it('should return 400 Bad Request if a circle is created with parentId', async () => {
+      await DataSource.getRepository(Location).clear();
+      const rootLocation = await DataSource.getRepository(Location).save({
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000 }),
+      });
+      const parentLocation = await DataSource.getRepository(Location).save({
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000 }),
+        parentId: rootLocation.id,
+      });
+      const childLocation = await DataSource.getRepository(Location).save({
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000 }),
+        parentId: parentLocation.id,
+      });
+      const data: CreateLocationDto = {
+        name: faker.string.alpha({ length: { min: 1, max: 255 } }),
+        code: faker.location.buildingNumber(),
+        area: faker.number.float({ min: 1, max: 1000 }),
+        parentId: childLocation.id,
+      };
+      return request(app.getHttpServer())
+        .put(`/locations/${rootLocation.id}`)
+        .send(data)
+        .expect(400);
+    });
+
     it('should return 404 Not Found if location does not exists', async () => {
       await DataSource.getRepository(Location).clear();
       const data: CreateLocationDto = {
