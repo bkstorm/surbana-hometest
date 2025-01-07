@@ -7,6 +7,10 @@ import { ILike, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Location } from '../entities';
 import { CreateLocationDto, GetLocationsDto } from '../dtos';
+import {
+  LOCATION_ERROR_CODE,
+  LOCATION_CONSTRAINT_CODE,
+} from './location.constants';
 
 @Injectable()
 export class LocationService {
@@ -79,16 +83,20 @@ export class LocationService {
       }
       return this.locationRepository.findOneBy({ id });
     } catch (error) {
-      if (error.constraint === 'location_parent_id_fkey') {
+      if (error.constraint === LOCATION_CONSTRAINT_CODE.PARENT_ID_NOT_FOUND) {
         throw new BadRequestException(
           'Location with provided parentId does not exist',
         );
       }
 
-      if (error.constraint === 'location_code_key') {
+      if (error.constraint === LOCATION_CONSTRAINT_CODE.CODE_DUPLICATED) {
         throw new BadRequestException(
           'Location with provided code already exists',
         );
+      }
+
+      if (error.code === LOCATION_ERROR_CODE.CIRCULAR_LOCATION) {
+        throw new BadRequestException(error.message);
       }
 
       throw error;
